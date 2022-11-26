@@ -1,6 +1,8 @@
 const express  = require('express')
 const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const jwt = require('jsonwebtoken');
+
 require('dotenv').config()
 
 const app  = express()
@@ -16,6 +18,24 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
  
+function verifyJWT(req, res, next){
+    const authHeader = req.headers?.authoraization
+
+    if(!authHeader){
+        res.status(401).send('Unauthoraize access')
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded){
+        if(err){
+            return res.status(403).send({ message:'Forbidden Access'})
+        }
+        req.decoded = decoded
+        next()
+    })
+}
+
 async function run(){
     try{
         const userCollection = client.db('pushpaliResell').collection('users')
@@ -27,13 +47,33 @@ async function run(){
             const result = await userCollection.insertOne(user)
             res.send(result)
         })
+        app.get('/jwt', async(req,res)=>{
+            const email = req.query.email
+            const query = {email:email}
+            const user = await userCollection.findOne(query)
+            if(user){
+                const token = jwt.sign({email}, process.env.ACCESS_TOKEN,{
+                    expiresIn:'10h',
+
+                })
+                res.send({
+                    accessToken : token
+                })
+
+            }
+            else{
+                return res.status(403).send({accessToken:''})
+            }
+        })
+
+
         app.post('/categories', async(req, res)=>{
             const category = req.body
             const result = await categoryCollection.insertOne(category)
             res.send(result)
         })
 
-        
+
         app.post('/products', async(req, res)=>{
             const product = req.body
             const result = await productsCollection.insertOne(product)
@@ -53,6 +93,15 @@ async function run(){
         app.get('/categories', async(req, res)=>{
             const queary = {}
             const result = await categoryCollection.find(queary).toArray()
+            res.send(result)
+        })
+        app.get('/category/:name', async(req,res)=>{
+            const name = req.params.name
+            const query = {
+                category: name
+            }
+
+            const result = await productsCollection.find(query).toArray()
             res.send(result)
         })
     }
