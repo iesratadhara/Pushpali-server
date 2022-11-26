@@ -20,6 +20,7 @@ async function run(){
     try{
         const userCollection = client.db('pushpaliResell').collection('users')
         const categoryCollection = client.db('pushpaliResell').collection('categories')
+        const productsCollection = client.db('pushpaliResell').collection('products')
 
         app.post('/users', async(req, res)=>{
             const user = req.body
@@ -27,11 +28,23 @@ async function run(){
             res.send(result)
         })
         app.post('/categories', async(req, res)=>{
-            const user = req.body
-            const result = await categoryCollection.insertOne(user)
+            const category = req.body
+            const result = await categoryCollection.insertOne(category)
             res.send(result)
         })
 
+        
+        app.post('/products', async(req, res)=>{
+            const product = req.body
+            const result = await productsCollection.insertOne(product)
+            res.send(result)
+        })
+
+        app.get('/products', async(req, res)=>{
+            const queary = {}
+            const result = await productsCollection.find(queary).toArray()
+            res.send(result)
+        })
         app.get('/users', async(req, res)=>{
             const queary = {}
             const result = await userCollection.find(queary).toArray()
