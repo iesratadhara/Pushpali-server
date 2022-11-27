@@ -163,7 +163,19 @@ async function run(){
             res.send(result)
         })
 
-        app.get('/product/')
+        // app.get('/add-status',async(req,res)=>{
+        //     const filter ={}
+        //     const options = {upsert:true}
+        //     const updateDoc = {
+        //         $set:{
+        //             status:'unsold'
+        //         }
+        //     }
+
+        //     const result = await productsCollection.updateMany(filter, updateDoc,options)
+        //     res.send(result)
+
+        // })
 
         app.get('/users', async(req, res)=>{
             const queary = {}
@@ -175,10 +187,10 @@ async function run(){
             const result = await categoryCollection.find(queary).toArray()
             res.send(result)
         })
-        app.get('/category/:name', async(req,res)=>{
-            const name = req.params.name
+        app.get('/category/:id', async(req,res)=>{
+            const id = req.params.id
             const query = {
-                category: name
+                categoryId: id
             }
 
             const result = await productsCollection.find(query).toArray()
