@@ -73,6 +73,27 @@ async function run(){
             next()
         }
         
+        
+        app.get('/jwt', async(req,res)=>{
+            const email = req.query.email
+            const query = {email:email}
+            const user = await userCollection.findOne(query)
+            if(user){
+                const token = jwt.sign({email}, process.env.ACCESS_TOKEN,{
+                    expiresIn:'10h',
+
+                })
+                res.send({
+                    accessToken : token,
+                    user:user
+                })
+
+            }
+            else{
+                return res.status(403).send({accessToken:''})
+            }
+        })
+
         app.put('/users', async(req, res)=>{
             const user = req.body
             console.log(user);
@@ -89,25 +110,24 @@ async function run(){
             const result = await userCollection.updateOne(filter,updateDoc,options)
             res.send(result)
         })
-        app.get('/jwt', async(req,res)=>{
-            const email = req.query.email
-            const query = {email:email}
-            const user = await userCollection.findOne(query)
-            if(user){
-                const token = jwt.sign({email}, process.env.ACCESS_TOKEN,{
-                    expiresIn:'10h',
 
-                })
-                res.send({
-                    accessToken : token
-                })
+        app.get('/users/admin/:email', async (req, res)=>{
+         const email = req.params.email 
+         const queary = {
+            eamil:email
+         } 
+         const user = await userCollection.findOne(queary)
+         res.send({isAdmin: user?.role==='admin'})
+        }) 
 
-            }
-            else{
-                return res.status(403).send({accessToken:''})
-            }
-        })
-
+        app.get('/users/seller/:email', async (req, res)=>{
+         const email = req.params.email 
+         const queary = {
+            eamil:email
+         } 
+         const user = await userCollection.findOne(queary)
+         res.send({isSeller: user?.role==='seller'})
+        }) 
 
         app.post('/categories', async(req, res)=>{
             const category = req.body
