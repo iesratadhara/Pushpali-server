@@ -42,6 +42,37 @@ async function run(){
         const categoryCollection = client.db('pushpaliResell').collection('categories')
         const productsCollection = client.db('pushpaliResell').collection('products')
 
+        const verifyBuyer = async (req, res, next)=>{
+            const decodedEmail = req.decoded.email
+            const query = {email: decodedEmail}
+
+            const user = await userCollection.findOne(query)
+            if(user.role !== "buyer"){
+                return res.status(403).send({ message:'Forbidden Access'})
+            }
+            next()
+        }
+        const verifyAdmin = async (req, res, next)=>{
+            const decodedEmail = req.decoded.email
+            const query = {email: decodedEmail}
+
+            const user = await userCollection.findOne(query)
+            if(user.role !== "admin"){
+                return res.status(403).send({ message:'Forbidden Access'})
+            }
+            next()
+        }
+        const verifySeller = async (req, res, next)=>{
+            const decodedEmail = req.decoded.email
+            const query = {email: decodedEmail}
+
+            const user = await userCollection.findOne(query)
+            if(user.role !== "seller"){
+                return res.status(403).send({ message:'Forbidden Access'})
+            }
+            next()
+        }
+        
         app.put('/users', async(req, res)=>{
             const user = req.body
             console.log(user);
@@ -85,7 +116,7 @@ async function run(){
         })
 
 
-        app.post('/products', async(req, res)=>{
+        app.post('/products', verifyJWT, async(req, res)=>{
             const product = req.body
             const result = await productsCollection.insertOne(product)
             res.send(result)
