@@ -42,9 +42,20 @@ async function run(){
         const categoryCollection = client.db('pushpaliResell').collection('categories')
         const productsCollection = client.db('pushpaliResell').collection('products')
 
-        app.post('/users', async(req, res)=>{
+        app.put('/users', async(req, res)=>{
             const user = req.body
-            const result = await userCollection.insertOne(user)
+            console.log(user);
+            const filter = {email:user.email}
+            const updateDoc = {
+                $set: {
+                    name: user.name,
+                    email:  user.email,
+                    photoURL: user.photoURL,
+                    role: user.role
+                },
+              };
+            const options = { upsert: true };
+            const result = await userCollection.updateOne(filter,updateDoc,options)
             res.send(result)
         })
         app.get('/jwt', async(req,res)=>{
@@ -113,7 +124,10 @@ async function run(){
 run().catch(console.log)
 
 app.get('/', async(req,res)=>{
-    res.send('Pushpali server is running')
+    res.send({
+        Server: 'Pushpali',
+        Stattus:'ok',    
+    })
 })
 
 app.listen(port,()=>{
