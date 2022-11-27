@@ -113,19 +113,21 @@ async function run(){
 
         app.get('/users/admin/:email', async (req, res)=>{
          const email = req.params.email 
-         const queary = {
-            eamil:email
-         } 
+         console.log(email);
+        //  const queary = {email} 
          const user = await userCollection.findOne(queary)
+        //  console.log(user);
+        //  console.log('isAdmin',user?.role==='admin');
          res.send({isAdmin: user?.role==='admin'})
         }) 
 
         app.get('/users/seller/:email', async (req, res)=>{
          const email = req.params.email 
          const queary = {
-            eamil:email
+             email
          } 
          const user = await userCollection.findOne(queary)
+        //  console.log('isSeller:', user?.role==='seller');
          res.send({isSeller: user?.role==='seller'})
         }) 
 
@@ -147,6 +149,9 @@ async function run(){
             const result = await productsCollection.find(queary).toArray()
             res.send(result)
         })
+
+        app.get('/product/')
+
         app.get('/users', async(req, res)=>{
             const queary = {}
             const result = await userCollection.find(queary).toArray()
@@ -166,6 +171,7 @@ async function run(){
             const result = await productsCollection.find(query).toArray()
             res.send(result)
         })
+        
     }
     finally{
 
