@@ -113,8 +113,8 @@ async function run(){
 
         app.get('/users/admin/:email', async (req, res)=>{
          const email = req.params.email 
-         console.log(email);
-        //  const queary = {email} 
+        //  console.log(email);
+         const queary = {email} 
          const user = await userCollection.findOne(queary)
         //  console.log(user);
         //  console.log('isAdmin',user?.role==='admin');
@@ -163,6 +163,22 @@ async function run(){
             res.send(result)
 
         })
+        app.get('/products/adverties', async(req, res)=>{
+            const queary = {
+                advertise: true
+            }
+            const result = await productsCollection.find(queary).toArray()
+            res.send(result)
+
+        })
+
+        app.get('/all-seller',verifyJWT , verifyAdmin,async (req, res)=>{
+            const query ={
+                role:'seller'
+            }
+            const result = await userCollection.find(query).toArray()
+            res.send(result)
+        })
 
         app.delete('/delete-product/:id', verifyJWT, verifySeller, async (req, res)=>{
             const id = req.params.id
@@ -170,6 +186,46 @@ async function run(){
             const result = await productsCollection.deleteOne(query)
             res.send(result)
 
+        })
+        app.delete('/delete-seller/:id', verifyJWT, verifyAdmin, async (req, res)=>{
+            const id = req.params.id
+            const query = {_id: ObjectId(id)} 
+            const result = await userCollection.deleteOne(query)
+            res.send(result)
+
+        })
+        app.put('/verify-seller/:id',verifyJWT,verifyAdmin, async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id: ObjectId(id)} 
+            const options = {upsert:true}
+            const updateDoc = {
+                $set:{
+                    verified: true
+                }
+            }
+
+            const result = await userCollection.updateOne(filter,updateDoc,options)
+            res.send(result)
+        })
+        app.delete('/delete-buyer/:id', verifyJWT, verifyAdmin, async (req, res)=>{
+            const id = req.params.id
+            const query = {_id: ObjectId(id)} 
+            const result = await userCollection.deleteOne(query)
+            res.send(result)
+
+        })
+        app.put('/verify-buyer/:id',verifyJWT,verifyAdmin, async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id: ObjectId(id)} 
+            const options = {upsert:true}
+            const updateDoc = {
+                $set:{
+                    verified: true
+                }
+            }
+
+            const result = await userCollection.updateOne(filter,updateDoc,options)
+            res.send(result)
         })
 
         app.put('/products/advarties/:id',verifyJWT,verifySeller, async(req, res)=>{
