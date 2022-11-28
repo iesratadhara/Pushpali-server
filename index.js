@@ -172,6 +172,20 @@ async function run(){
 
         })
 
+        app.put('/products/advarties/:id',verifyJWT,verifySeller, async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id: ObjectId(id)} 
+            const options = {upsert:true}
+            const updateDoc = {
+                $set:{
+                    advertise: true
+                }
+            }
+
+            const result = await productsCollection.updateOne(filter,updateDoc,options)
+            res.send(result)
+        })
+
         // app.get('/add-status',async(req,res)=>{
         //     const filter ={}
         //     const options = {upsert:true}
